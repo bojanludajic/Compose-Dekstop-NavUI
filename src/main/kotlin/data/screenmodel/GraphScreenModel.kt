@@ -102,18 +102,20 @@ class GraphScreenModel {
 
     private fun generateNavigationCode(): CodeBlock {
         val codeBlock = CodeBlock.builder()
-        if(!nodes.isEmpty()) {
-            codeBlock.addStatement("var currentScreen by remember { mutableStateOf(%S)", nodes.first().name.value)
+        if(nodes.isNotEmpty()) {
+            codeBlock.addStatement("var currentScreen by remember { mutableStateOf(%S)\n", nodes.first().name.value)
 
             codeBlock.add("when (currentScreen) {\n")
 
             for (node in nodes) {
                 val adjacentEdges = edges.filter { it.first.id == node.id }
                 codeBlock.addStatement("%S -> {", node.name.value)
-                for (edge in adjacentEdges) {
-                    codeBlock.addStatement("    /* Navigate to %S */", edge.second.name.value)
+                if(adjacentEdges.isNotEmpty()) {
+                    for (edge in adjacentEdges) {
+                        codeBlock.addStatement("    /* Navigation function to: %S */", edge.second.name.value)
+                    }
+                    codeBlock.addStatement("    }")
                 }
-                codeBlock.addStatement("}")
             }
             codeBlock.add("}\n")
         }
