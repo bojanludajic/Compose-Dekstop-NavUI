@@ -21,10 +21,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 
 
 @Composable
-fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }): Unit {
+fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }) {
 
-    var nodes = remember { screenModel.nodes }
-    var edges = remember { screenModel.edges }
     var x: String
 
     Scaffold(
@@ -105,18 +103,28 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
                     seletedNode1 = screenModel.selectedNode1,
                     selectedNode2 = screenModel.selectedNode2,
                     onClick = { screenModel.onNodeClick(node) },
-                    onDrag = { pan -> screenModel.onNodeDrag(node, pan) },
+                    onDrag = { pan ->
+                        screenModel.onNodeDrag(node, pan) },
                     onNameChange = { newName ->
-                        screenModel.updateNodeName(node.id, newName) }
+                        screenModel.updateNodeName(node.id, newName)
+                        screenModel.clearSelection()
+                    }
                 )
             }
 
             Column {
                 screenModel.edges.forEach { (node1, node2) ->
                     println(screenModel.selectedNode1)
-                    Text(
-                        text = "${node1.name.value} -> ${node2.name.value}"
-                    )
+                    TextButton(
+                        onClick = {
+                            screenModel.deleteEdge(node1, node2)
+                        }
+                    ) {
+                        Text(
+                            text = "${node1.name.value} -> ${node2.name.value}",
+                            color = Color.Black
+                        )
+                    }
                 }
             }
 

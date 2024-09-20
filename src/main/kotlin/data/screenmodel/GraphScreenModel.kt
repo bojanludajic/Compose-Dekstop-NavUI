@@ -35,10 +35,18 @@ class GraphScreenModel {
         curId = 0
     }
 
+    fun clearSelection() {
+        selectedNode1 = null
+    }
+
+    fun deleteEdge(node1: GraphNode, node2: GraphNode) {
+        edges = edges.filter { it.first != node1 || it.second != node2 }.toSet()
+    }
+
     fun addNode(position: Offset) {
         val newNodePosition = Offset(position.x - 200, position.y - 100)
         if (isPlacingNode) {
-            nodes = nodes + GraphNode(curId, mutableStateOf("Screen $curId"), newNodePosition)
+            nodes = nodes + GraphNode(curId, mutableStateOf("Screen$curId"), newNodePosition)
             curId++
             isPlacingNode = false
         }
@@ -103,17 +111,18 @@ class GraphScreenModel {
     private fun generateNavigationCode(): CodeBlock {
         val codeBlock = CodeBlock.builder()
         if(nodes.isNotEmpty()) {
+            codeBlock.addStatement("")
             codeBlock.addStatement("var currentScreen by remember { mutableStateOf(%S)\n", nodes.first().name.value)
 
-            codeBlock.add("when (currentScreen) {\n")
+            codeBlock.add("when (currentScreen.value) {\n")
 
             for (node in nodes) {
                 val adjacentEdges = edges.filter { it.first.id == node.id }
-                codeBlock.addStatement("%S -> {", node.name.value)
+                System.out.println(adjacentEdges)
+                codeBlock.addStatement("    \"${node.name.value}\" -> ${node.name.value}()")
                 if(adjacentEdges.isNotEmpty()) {
-                    for (edge in adjacentEdges) {
-                        codeBlock.addStatement("    /* Navigation function to: %S */", edge.second.name.value)
-                    }
+                    codeBlock.addStatement("    {")
+                    codeBlock.addStatement("        currentScreen.value = it ")
                     codeBlock.addStatement("    }")
                 }
             }
