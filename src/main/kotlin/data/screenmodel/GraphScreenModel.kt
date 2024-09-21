@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.*
 import data.model.GraphNode
 
@@ -112,15 +114,14 @@ class GraphScreenModel {
         val codeBlock = CodeBlock.builder()
         if(nodes.isNotEmpty()) {
             codeBlock.addStatement("")
-            codeBlock.addStatement("var currentScreen by remember { mutableStateOf(%S)\n", nodes.first().name.value)
+            codeBlock.addStatement("var currentScreen: MutableState<String> = remember { mutableStateOf(%S) }\n", nodes.first().name.value)
 
-            codeBlock.add("when (currentScreen.value) {\n")
+            codeBlock.addStatement("when (currentScreen.value) {")
 
             for (node in nodes) {
-                val adjacentEdges = edges.filter { it.first.id == node.id }
-                System.out.println(adjacentEdges)
+                val adjacentVertices = edges.filter { it.first.id == node.id }
                 codeBlock.addStatement("    \"${node.name.value}\" -> ${node.name.value}()")
-                if(adjacentEdges.isNotEmpty()) {
+                if(adjacentVertices.isNotEmpty()) {
                     codeBlock.addStatement("    {")
                     codeBlock.addStatement("        currentScreen.value = it ")
                     codeBlock.addStatement("    }")
@@ -129,5 +130,9 @@ class GraphScreenModel {
             codeBlock.add("}\n")
         }
         return codeBlock.build()
+    }
+
+    fun copyToClipboard(clipboardManager: ClipboardManager) {
+        clipboardManager.setText(AnnotatedString(generateNavigationGraph()))
     }
 }

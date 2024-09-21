@@ -4,6 +4,7 @@ import DarkGreen200
 import GraphScreenModel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -11,19 +12,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.unit.dp
 
 
 @Composable
 fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }) {
 
-    var x: String
+    var navCode: String
+    val clipboardManager = LocalClipboardManager.current
+    var showInfo by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -32,8 +36,7 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
             ) {
                 Button(
                     onClick = {
-                       x = screenModel.generateNavigationGraph()
-                        println(x)
+                        screenModel.copyToClipboard(clipboardManager)
                     }
                 ) {
                     Text("Generate code")
@@ -53,7 +56,7 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
                     }
                     IconButton(
                         onClick = {
-
+                            showInfo = !showInfo
                         }
                     ) {
                         Icon(
@@ -102,9 +105,12 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
                     node = node,
                     seletedNode1 = screenModel.selectedNode1,
                     selectedNode2 = screenModel.selectedNode2,
-                    onClick = { screenModel.onNodeClick(node) },
+                    onClick = {
+                        screenModel.onNodeClick(node)
+                              },
                     onDrag = { pan ->
-                        screenModel.onNodeDrag(node, pan) },
+                        screenModel.onNodeDrag(node, pan)
+                             },
                     onNameChange = { newName ->
                         screenModel.updateNodeName(node.id, newName)
                         screenModel.clearSelection()
@@ -114,7 +120,6 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
 
             Column {
                 screenModel.edges.forEach { (node1, node2) ->
-                    println(screenModel.selectedNode1)
                     TextButton(
                         onClick = {
                             screenModel.deleteEdge(node1, node2)
@@ -138,7 +143,22 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+            if(showInfo) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .fillMaxHeight(0.8f)
+                        .align(Alignment.Center)
+                        .background(Color.White)
+                        .border(1.dp, Color.Black)
+                ) {
+                    InfoAlert {
+                        showInfo = false
+                    }
+                }
+            }
         }
+
     }
 }
 
