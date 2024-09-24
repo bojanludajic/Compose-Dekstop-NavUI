@@ -45,7 +45,7 @@ fun DrawNode(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    var bgColor = if (seletedNode1 == node || selectedNode2 == node) Color.Green else Color.White
+    var bgColor = if (seletedNode1 == node) Color.Green else Color.White
 
     Box(
         modifier = Modifier

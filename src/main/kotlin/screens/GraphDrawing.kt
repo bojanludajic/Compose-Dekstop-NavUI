@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }) {
 
-    var navCode: String
     val clipboardManager = LocalClipboardManager.current
     var showInfo by remember { mutableStateOf(false) }
 
