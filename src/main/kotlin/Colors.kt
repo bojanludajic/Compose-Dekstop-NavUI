@@ -13,3 +13,6 @@ val DarkGreen100 = Color(0xFF1B5E20)
 val DarkGreen200 = Color(0xFF004D40)
 val DarkGreen300 = Color(0xFF002F1D)
 val DarkGreen400 = Color(0xFF004D40)
+
+val NotificationGreen = Color(0xFF4CAF50)
+val NotificationRed = Color(0xFFF44336)

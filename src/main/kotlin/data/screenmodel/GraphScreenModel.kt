@@ -75,7 +75,7 @@ class GraphScreenModel {
                 it
             }
         }
-
+        
         edges = edges.map { (node1, node2) ->
             val newNode1 = nodes.find { it.id == node1.id }!!
             val newNode2 = nodes.find { it.id == node2.id }!!

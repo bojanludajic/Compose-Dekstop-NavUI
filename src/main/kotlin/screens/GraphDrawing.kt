@@ -2,6 +2,10 @@ package screens
 
 import DarkGreen200
 import GraphScreenModel
+import NotificationGreen
+import NotificationRed
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -27,6 +33,8 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
 
     val clipboardManager = LocalClipboardManager.current
     var showInfo by remember { mutableStateOf(false) }
+    var showCopyNotification  by remember {mutableStateOf(false) }
+    var validCopySnapshot by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -35,7 +43,11 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
             ) {
                 Button(
                     onClick = {
-                        screenModel.copyToClipboard(clipboardManager)
+                        if(screenModel.nodes.isNotEmpty()) {
+                            screenModel.copyToClipboard(clipboardManager)
+                        }
+                        validCopySnapshot = screenModel.nodes.isNotEmpty()
+                        showCopyNotification = true
                     }
                 ) {
                     Text("Generate code")
@@ -103,7 +115,6 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
                 DrawNode(
                     node = node,
                     seletedNode1 = screenModel.selectedNode1,
-                    selectedNode2 = screenModel.selectedNode2,
                     onClick = {
                         screenModel.onNodeClick(node)
                               },
@@ -156,8 +167,52 @@ fun GraphDrawing(screenModel: GraphScreenModel = remember { GraphScreenModel() }
                     }
                 }
             }
-        }
+            if(showCopyNotification) {
+                copyNotification(validCopySnapshot)
+                LaunchedEffect(Unit) {
+                    delay(3000)
+                    showCopyNotification = false
+                }
 
+            }
+        }
     }
 }
+
+@Composable
+fun copyNotification(
+    validCopy: Boolean,
+) {
+    var offsetY by remember { mutableStateOf(-200.dp) }
+    val animatedOffsetY by animateDpAsState(
+        targetValue = offsetY,
+        animationSpec = tween(durationMillis = 300)
+    )
+
+    LaunchedEffect(Unit) {
+        offsetY = 0.dp
+    }
+
+    val text = if(validCopy) "Navigation graph code copied to clipboard" else "Navigation graph is empty"
+    val boxColor = if(validCopy) NotificationGreen else NotificationRed
+
+    Spacer(modifier = Modifier
+        .height(200.dp))
+
+    Box(
+        modifier = Modifier
+            .offset(y = animatedOffsetY)
+            .fillMaxWidth()
+            .fillMaxHeight(0.075f)
+            .background(boxColor)
+    ) {
+        Text(
+            text = text,
+            fontSize = 15.sp,
+            modifier = Modifier
+                .align(Alignment.Center)
+        )
+    }
+}
+
 

@@ -1,5 +1,6 @@
 package screens
 
+import NotificationGreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,7 +38,6 @@ import data.model.GraphNode
 fun DrawNode(
     node: GraphNode,
     seletedNode1: GraphNode?,
-    selectedNode2: GraphNode?,
     onClick: () -> Unit,
     onDrag: (Offset) -> Unit,
     onNameChange: (MutableState<String>) -> Unit
@@ -45,7 +45,7 @@ fun DrawNode(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    var bgColor = if (seletedNode1 == node) Color.Green else Color.White
+    val bgColor = if (seletedNode1 == node) NotificationGreen else Color.White
 
     Box(
         modifier = Modifier
