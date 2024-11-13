@@ -104,6 +104,7 @@ class GraphScreenModel {
             .build()
 
         val file = FileSpec.builder("com.example.navigation", "NavigationGraph")
+            .addType(generateScreenEnums())
             .addFunction(navigationGraphFunction)
             .build()
 
@@ -114,17 +115,19 @@ class GraphScreenModel {
         val codeBlock = CodeBlock.builder()
         if(nodes.isNotEmpty()) {
             codeBlock.addStatement("")
-            codeBlock.addStatement("var currentScreen: MutableState<String> = remember { mutableStateOf(%S) }\n", nodes.first().name.value)
+            codeBlock.addStatement("var currentScreen = remember { mutableStateOf(Screen.${nodes.first().name.value.toUpperCase()}) }\n")
 
-            codeBlock.addStatement("when (currentScreen.value) {")
+            codeBlock.addStatement("when (currentScreen) {")
 
             for (node in nodes) {
                 val adjacentVertices = edges.filter { it.first.id == node.id }
-                codeBlock.addStatement("    \"${node.name.value}\" -> ${node.name.value}()")
                 if(adjacentVertices.isNotEmpty()) {
-                    codeBlock.addStatement("    {")
-                    codeBlock.addStatement("        currentScreen.value = it ")
-                    codeBlock.addStatement("    }")
+                    codeBlock.addStatement("    ${node.name.value.toUpperCase()} -> ${node.name.value}()")
+                    if (adjacentVertices.isNotEmpty()) {
+                        codeBlock.addStatement("    {")
+                        codeBlock.addStatement("        currentScreen.value = it ")
+                        codeBlock.addStatement("    }")
+                    }
                 }
             }
             codeBlock.add("}\n")
@@ -132,7 +135,18 @@ class GraphScreenModel {
         return codeBlock.build()
     }
 
+    private fun generateScreenEnums(): TypeSpec {
+        val screenEnum = TypeSpec.enumBuilder("Screen")
+
+        nodes.forEach { node ->
+            screenEnum.addEnumConstant(node.name.value.toUpperCase())
+        }
+        return screenEnum.build()
+    }
+
     fun copyToClipboard(clipboardManager: ClipboardManager) {
-        clipboardManager.setText(AnnotatedString(generateNavigationGraph()))
+        // hack to remove extra trailing comma after the last enum
+        val navigationGraph = generateNavigationGraph().replace(",\n}", "\n}")
+        clipboardManager.setText(AnnotatedString(navigationGraph))
     }
 }
